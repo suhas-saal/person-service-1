@@ -27,7 +27,7 @@ public class PersonController {
             @ApiResponse(code = 404, message = "No Content"),
             @ApiResponse(code = 405, message = "Method not allowed"),
             @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 200, message = "Success", response = List.class, responseContainer = "List") })
+            @ApiResponse(code = 200, message = "Success", response = List.class, responseContainer = "List")})
     @GetMapping("/")
     public List<Person> getAllPersons() {
         return personService.getAll();
@@ -51,10 +51,10 @@ public class PersonController {
             @ApiResponse(code = 500, message = "Server error"),
             @ApiResponse(code = 404, message = "Document not found"),
             @ApiResponse(code = 200, message = "Success",
-                    response = List.class, responseContainer = "List") })
+                    response = List.class, responseContainer = "List")})
     @PutMapping("/{personId}")
     public Person updateDocument(@ApiParam(value = "personId", required = true) @PathVariable(value = "personId") Long personId,
-                                   @Valid @RequestBody PersonRequest request) {
+                                 @Valid @RequestBody PersonRequest request) {
         return personService.update(personId, request);
     }
 
@@ -78,14 +78,10 @@ public class PersonController {
             @ApiResponse(code = 405, message = "Method not allowed"),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 200, message = "Success")})
-    @RequestMapping(method = RequestMethod.HEAD, value = "/{personId}/exists", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @RequestMapping(method = RequestMethod.GET, value = "/{personId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> checkIfPersonExists(@ApiParam(value = "personId", required = true) @PathVariable long personId) {
-        try {
-            personService.checkIfPersonExists(personId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
-        }
+        return new ResponseEntity<>(personService.checkIfPersonExists(personId), HttpStatus.OK);
+
     }
 
 }

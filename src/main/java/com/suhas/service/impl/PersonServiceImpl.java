@@ -1,15 +1,15 @@
 package com.suhas.service.impl;
 
 import com.suhas.dto.PersonRequest;
-import com.suhas.exception.ResourceNotFoundException;
+import com.suhas.exception.PersonNotFoundException;
 import com.suhas.model.Person;
 import com.suhas.repository.PersonRepository;
 import com.suhas.service.IPersonService;
 import com.suhas.utility.DateUtils;
+import com.suhas.utility.ResourceBundleAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,7 +50,7 @@ public class PersonServiceImpl implements IPersonService {
     @Override
     public Person update(Long id, PersonRequest request) {
         Person person = personRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Person", "id", id));
+                .orElseThrow(() -> new PersonNotFoundException(ResourceBundleAccessor.getMessage("person.not.found")));
 
         person.setFirstName(request.getFirstName());
         person.setLastName(request.getLastName());
@@ -64,7 +64,7 @@ public class PersonServiceImpl implements IPersonService {
     @Override
     public void delete(Long id) {
         Person person = personRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Person", "id", id));
+                .orElseThrow(() -> new PersonNotFoundException(ResourceBundleAccessor.getMessage("person.not.found")));
         personRepository.delete(person);
     }
 

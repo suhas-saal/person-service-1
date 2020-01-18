@@ -1,7 +1,7 @@
 package com.suhas.service;
 
 import com.suhas.dto.PersonRequest;
-import com.suhas.exception.ResourceNotFoundException;
+import com.suhas.exception.PersonNotFoundException;
 import com.suhas.model.Person;
 import org.junit.Assert;
 import org.junit.Test;
@@ -49,7 +49,7 @@ public class PersonServiceTest {
     }
 
     @DisplayName("Testing Update Person")
-    @Test(expected = ResourceNotFoundException.class)
+    @Test(expected = PersonNotFoundException.class)
     public void testUpdateUserNegative() {
         personService.deleteAll();
         personService.update(100l, null);
@@ -73,7 +73,7 @@ public class PersonServiceTest {
     }
 
     @DisplayName("Testing Delete User Not Exists")
-    @Test(expected = ResourceNotFoundException.class)
+    @Test(expected = PersonNotFoundException.class)
     public void testDeleteNegative() {
         personService.delete(999l);
     }
