@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * Custom @{@link PersonServiceException} for Invalid Person
  */
-@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Invalid Person ID")
+@ResponseStatus(value = HttpStatus.NOT_FOUND)
 public class PersonNotFoundException extends PersonServiceException {
 
     public PersonNotFoundException(String message) {

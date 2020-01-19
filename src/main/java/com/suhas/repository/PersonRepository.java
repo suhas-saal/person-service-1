@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PersonRepository extends JpaRepository<Person, Long> {
 
-    Person findByFirstNameAndLastNameAndActive(String firstName, String lastName, Boolean active);
+    Person findByFirstNameAndLastName(String firstName, String lastName);
 
 }

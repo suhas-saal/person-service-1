@@ -15,7 +15,7 @@ public interface IPersonService {
     /**
      * Check if person already exists
      */
-    boolean checkIfPersonExists(Long id);
+    boolean checkIfPersonExists(PersonRequest request);
 
     /**
      * Update a person  @{@link Person}
@@ -37,4 +37,10 @@ public interface IPersonService {
      * @return persons
      */
     List<Person> getAll();
+
+    /**
+     * Get Persons @{@link Person}
+     * @return person
+     */
+    Person findById(Long id);
 }

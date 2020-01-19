@@ -1,10 +1,14 @@
 package com.suhas.controller;
 
 import com.suhas.dto.PersonRequest;
+import com.suhas.exception.PersonAlreadyExistsException;
+import com.suhas.exception.PersonNotFoundException;
+import com.suhas.exception.PersonServiceException;
 import com.suhas.model.Person;
 import com.suhas.service.IPersonService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +33,12 @@ public class PersonController {
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 200, message = "Success", response = List.class, responseContainer = "List")})
     @GetMapping("/")
-    public List<Person> getAllPersons() {
-        return personService.getAll();
+    public ResponseEntity<List<Person>> getAllPersons() {
+        List<Person> persons = personService.getAll();
+        if (persons.isEmpty()) {
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(persons, HttpStatus.OK);
     }
 
 
@@ -42,8 +50,13 @@ public class PersonController {
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 200, message = "Success", response = Person.class)})
     @PostMapping("/")
-    public Person createPerson(@RequestBody PersonRequest request) {
-        return personService.create(request);
+    public ResponseEntity<?> createPerson(@RequestBody PersonRequest request) throws PersonServiceException {
+        if (personService.checkIfPersonExists(request)) {
+            throw new PersonAlreadyExistsException("Unable to update. Person with name " +
+                    request.getFirstName() + " " + request.getLastName() + " already exists.");
+        }
+        Person person = personService.create(request);
+        return new ResponseEntity<>(person, HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Update Person By Id", notes = "API to update a Person", nickname = "updatePerson")
@@ -53,9 +66,15 @@ public class PersonController {
             @ApiResponse(code = 200, message = "Success",
                     response = List.class, responseContainer = "List")})
     @PutMapping("/{personId}")
-    public Person updateDocument(@ApiParam(value = "personId", required = true) @PathVariable(value = "personId") Long personId,
-                                 @Valid @RequestBody PersonRequest request) {
-        return personService.update(personId, request);
+    public ResponseEntity<?> updateDocument(@ApiParam(value = "personId", required = true)
+                                            @PathVariable(value = "personId") Long personId,
+                                            @Valid @RequestBody PersonRequest request) throws PersonServiceException {
+        if (personService.findById(personId) == null) {
+            throw new PersonNotFoundException("Unable to update. Person with name " +
+                    request.getFirstName() + " " + request.getLastName() + " doesn't exist.");
+        }
+        Person updatedPerson = personService.update(personId, request);
+        return new ResponseEntity<>(updatedPerson, HttpStatus.OK);
     }
 
     @ApiOperation(value = "delete", notes = "Delete Person By id", nickname = "deletePerson")
@@ -66,22 +85,25 @@ public class PersonController {
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 200, message = "Success", response = String.class)})
     @DeleteMapping("/{personId}")
-    public String deletePerson(@PathVariable("personId") String personId) {
-        personService.delete(Long.parseLong(personId));
-        return "success";
+    public ResponseEntity<?> deletePerson(@PathVariable("personId") Long personId) throws PersonServiceException {
+        if (personService.findById(personId) == null) {
+            throw new PersonNotFoundException("Unable to update. Person with id " + personId + " doesn't exist.");
+        }
+        personService.delete(personId);
+        return new ResponseEntity<Person>(HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Check if person already exists", notes = "API to check if a person already exists", nickname = "checkIfPersonExists")
+    @ApiOperation(value = "deleteAll", notes = "Delete All Person", nickname = "deleteAll")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "Server error"),
             @ApiResponse(code = 404, message = "No Content"),
             @ApiResponse(code = 405, message = "Method not allowed"),
             @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 200, message = "Success")})
-    @RequestMapping(method = RequestMethod.GET, value = "/{personId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> checkIfPersonExists(@ApiParam(value = "personId", required = true) @PathVariable long personId) {
-        return new ResponseEntity<>(personService.checkIfPersonExists(personId), HttpStatus.OK);
-
+            @ApiResponse(code = 200, message = "Success", response = String.class)})
+    @DeleteMapping(value = "/")
+    public ResponseEntity<Person> deleteAllUsers() {
+        personService.deleteAll();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

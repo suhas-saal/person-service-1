@@ -39,9 +39,9 @@ public class PersonServiceImpl implements IPersonService {
     }
 
     @Override
-    public boolean checkIfPersonExists(Long id) {
-        Optional<Person> person = personRepository.findById(id);
-        if (person.isPresent()) {
+    public boolean checkIfPersonExists(PersonRequest request) {
+        Person person = personRepository.findByFirstNameAndLastName(request.getFirstName(), request.getLastName());
+        if (null != person) {
             return true;
         }
         return false;
@@ -71,5 +71,13 @@ public class PersonServiceImpl implements IPersonService {
     @Override
     public void deleteAll() {
         personRepository.deleteAll();
+    }
+
+    @Override
+    public Person findById(Long id) {
+        Optional<Person> person = personRepository.findById(id);
+        if (person.isPresent())
+            return person.get();
+        return null;
     }
 }
