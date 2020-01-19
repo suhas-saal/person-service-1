@@ -57,3 +57,21 @@ curl -X DELETE --header 'Accept: text/plain' 'http://localhost:9090/person/2'
 ```text
 curl -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{"age": "1","favourite_colour": "blue","first_name": "max", "hobby": ["reading"],"last_name": "payne"}' 'http://localhost:9090/person/1'
 ```
+
+**Database Administration**
+ - To manage h2 database, access 
+```sh
+http://localhost:9090/h2-console
+```
+ - Make sure that you set JDBC url to jdbc:h2:file:./PersonDB
+ 
+**Building the docker file**
+```sh
+docker build -t person-service .
+```
+  
+**Running the docker image**
+```sh
+docker run -p 9090:9090 person-service
+```
+    
