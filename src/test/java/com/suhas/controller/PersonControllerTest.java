@@ -49,6 +49,26 @@ public class PersonControllerTest {
     public void testCreate() throws Exception {
         personService.deleteAll();
         PersonRequest request = createPersonRequest();
+        //personService.create(request);
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(request);
+        System.out.println("JSON :: " + requestJson);
+
+        mockMvc.perform(post("/person/").contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(requestJson))
+                .andExpect(status().isCreated())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+    }
+
+    @DisplayName("Testing Create Persons")
+    @Test
+    public void testCreateDuplicatePerson() throws Exception {
+        personService.deleteAll();
+        PersonRequest request = createPersonRequest();
         personService.create(request);
 
         ObjectMapper mapper = new ObjectMapper();
@@ -59,7 +79,7 @@ public class PersonControllerTest {
 
         mockMvc.perform(post("/person/").contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(requestJson))
-                .andExpect(status().isOk())
+                .andExpect(status().isConflict())
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();
 
@@ -86,8 +106,22 @@ public class PersonControllerTest {
     @DisplayName("Testing valid search scenario where no match is found")
     @Test
     public void testSearchAllPersons() throws Exception {
+        personService.deleteAll();
+        PersonRequest request = createPersonRequest();
+        personService.create(request);
         MvcResult mvcResult = mockMvc.perform(get("/person/"))
                 .andExpect(status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+        Assert.assertNotNull(mvcResult.getResponse().getContentAsString());
+    }
+
+    @DisplayName("Testing valid search scenario where no match is found")
+    @Test
+    public void testSearchAllPersonsNoResult() throws Exception {
+        personService.deleteAll();
+        MvcResult mvcResult = mockMvc.perform(get("/person/"))
+                .andExpect(status().isNoContent())
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();
         Assert.assertNotNull(mvcResult.getResponse().getContentAsString());
@@ -111,6 +145,24 @@ public class PersonControllerTest {
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();
+    }
+
+    @DisplayName("Testing Update Person")
+    @Test
+    public void testUpdateInvalidPerson() throws Exception {
+        personService.deleteAll();
+        PersonRequest request = createPersonRequest();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(request);
+        System.out.println("JSON :: " + requestJson);
+
+        mockMvc.perform(put("/person/1" ).contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(requestJson))
+                .andExpect(status().isNotFound())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
 
     }
 
@@ -125,21 +177,26 @@ public class PersonControllerTest {
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();
-
     }
 
-    @DisplayName("Testing Check If Person Exists")
+    @DisplayName("Testing Delete Person")
     @Test
-    public void testCheckIfPersonExists() throws Exception {
+    public void testDeletePersonInvalid() throws Exception {
         personService.deleteAll();
-        PersonRequest request = createPersonRequest();
-        Person person = personService.create(request);
+        mockMvc.perform(delete("/person/1"))
+                .andExpect(status().isNotFound())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+    }
 
-        mockMvc.perform(head("/person/" + person.getId()))
+    @DisplayName("Testing Delete Person")
+    @Test
+    public void testDeleteAll() throws Exception {
+
+        mockMvc.perform(delete("/person/"))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();
-
     }
 
     private String[] getHobbies() {

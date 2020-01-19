@@ -62,14 +62,14 @@ public class PersonServiceTest {
         personService.deleteAll();
         PersonRequest request = createPersonRequest();
         Person person = personService.create(request);
-        Assert.assertTrue(personService.checkIfPersonExists(person.getId()));
+        Assert.assertTrue(personService.checkIfPersonExists(request));
     }
 
     @DisplayName("Testing Check User Exists")
     @Test
     public void testCheckIfUserExistsNotFound() {
         personService.deleteAll();
-        Assert.assertFalse(personService.checkIfPersonExists(1l));
+        Assert.assertFalse(personService.checkIfPersonExists(createPersonRequest()));
     }
 
     @DisplayName("Testing Delete User Not Exists")
